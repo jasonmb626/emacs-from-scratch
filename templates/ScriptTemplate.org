@@ -1,0 +1,8 @@
+* Script Info
+Script Name: ${title}
+Summary Goal: %^{Summary Goal}
+Work Order: %^{Work Order, if any}
+Assigned: 
+Projected Completion: 
+
+%?

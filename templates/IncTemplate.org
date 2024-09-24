@@ -1,0 +1,8 @@
+* Incident
+INC#: ${title}
+Summary: %^{Summary}
+Store #: %^{Store#}
+Assigned to us: 
+Due: 
+
+%?

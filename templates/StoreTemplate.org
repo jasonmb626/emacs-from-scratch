@@ -1,0 +1,7 @@
+* Store Info
+Store #: ${title}
+State: %^{State}
+Timezone: %^{Timezone}
+Phone #: %^{Phone}
+
+%?
