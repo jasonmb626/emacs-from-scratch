@@ -36,7 +36,7 @@
   (package-install 'use-package))
 
 (require 'use-package)
-(setq use-package-always-ensure t)
+(setq use-package-always-ensure t) ;otherwise we'd need to have a line :ensure t in every use-package if we want it to automatically download
 
 (use-package auto-package-update
   :custom
@@ -58,6 +58,7 @@
 (setq auto-save-file-name-transforms
       `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
 
+:;; Default is to open Emacs with a "Welcome to Emacs" screen. We want to make it minimal. This alone will make it open to the scratch buffer instead.
 (setq inhibit-startup-message t)
 
 (scroll-bar-mode -1)        ; Disable visible scrollbar
@@ -70,6 +71,7 @@
 ;; Set up the visible bell
 (setq visible-bell t)
 
+;; To make line/column numbers show by default
 (column-number-mode)
 (global-display-line-numbers-mode t)
 
@@ -87,13 +89,13 @@
                 eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
-(set-face-attribute 'default nil :font "Fira Code Retina" :height efs/default-font-size)
+(set-face-attribute 'default nil :font "Fira Code Retina" :height efs/default-font-size) ; This font not included with my distro. Download here: https://github.com/tonsky/FiraCode
 
 ;; Set the fixed pitch face
-(set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height efs/default-font-size)
+(set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height efs/default-font-size) ; This font not included with my distro. Download here: https://github.com/tonsky/FiraCode
 
 ;; Set the variable pitch face
-(set-face-attribute 'variable-pitch nil :font "Cantarell" :height efs/default-variable-font-size :weight 'regular)
+(set-face-attribute 'variable-pitch nil :font "Cantarell" :height efs/default-variable-font-size :weight 'regular) ; This font included with my Distro
 
 ;; Make ESC quit prompts
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
@@ -109,9 +111,25 @@
   (efs/leader-keys
     "t"  '(:ignore t :which-key "toggles")
     "tt" '(counsel-load-theme :which-key "choose theme")
-    "fde" '(lambda () (interactive) (find-file (expand-file-name "~/.emacs.d/Emacs.org")))))
+    "fde" '(lambda () (interactive) (find-file (expand-file-name "~/.emacs.d/Emacs.org")))
+    ",t" '(insert-now-timestamp :which-key "Insert Timestamp")))
 
-(use-package evil
+;(print "Hi" #'external-debugging-output)
+;(setq animals '(gazelle giraffe lion tiger))
+;
+;(defun print-elements-of-list (list)
+;  "Print each element of LIST on a line of its own."
+;  (while list
+;    (print (car list) #'external-debugging-output)
+;    (setq list (cdr list))))
+;
+;(print-elements-of-list animals)
+;
+;(print (elt animals 1) #'external-debugging-output)
+;
+;(print "There" #'external-debugging-output)
+
+(use-package evil ; Add vim keybindings
   :init
   (setq evil-want-integration t)
   (setq evil-want-keybinding nil)
@@ -119,8 +137,6 @@
   (setq evil-want-C-i-jump nil)
   :config
   (evil-mode 1)
-  (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
-  (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
 
   ;; Use visual line motions even outside of visual-line-mode buffers
   (evil-global-set-key 'motion "j" 'evil-next-visual-line)
@@ -139,12 +155,21 @@
 
 (use-package doom-themes
   :init (load-theme 'doom-palenight t))
+;; other sensible dark theme built in
+;(load-theme 'tango-dark)
+;better theme, but requires counsel to be installed (I think)
+;(load-theme 'wombat)
 
+;; NOTE: The first time you load your configuration on a new machine, you'll
+;; need to run the following command interactively so that mode line icons
+;; display correctly
+;;
+;; M-x all-the-icons-install-fonts
 (use-package all-the-icons)
 
 (use-package doom-modeline
   :init (doom-modeline-mode 1)
-  :custom ((doom-modeline-height 15)))
+  :custom ((doom-modeline-height 50)))
 
 (use-package which-key
   :defer 0
@@ -153,8 +178,9 @@
   (which-key-mode)
   (setq which-key-idle-delay 1))
 
+;; Gives fuzzy find and better autocompletion in commands (anything starting with M-x eg)
 (use-package ivy
-  :diminish
+  :diminish ; requires diminish package to be installed; keeps "ivy" from showing in display of major/minor modes activated
   :bind (("C-s" . swiper)
          :map ivy-minibuffer-map
          ("TAB" . ivy-alt-done)
@@ -171,7 +197,7 @@
   :config
   (ivy-mode 1))
 
-(use-package ivy-rich
+(use-package ivy-rich ;Gives more details on counsel-help screen
   :after ivy
   :init
   (ivy-rich-mode 1))
@@ -200,13 +226,15 @@
   (counsel-describe-function-function #'helpful-callable)
   (counsel-describe-variable-function #'helpful-variable)
   :bind
+					;Rather than explicity stating the key to rebind, we can say remap the key that is assigned to a function
+ 					;So describe-function's key binding (Ctrl h f) will now use counsel-describe function
   ([remap describe-function] . counsel-describe-function)
   ([remap describe-command] . helpful-command)
   ([remap describe-variable] . counsel-describe-variable)
   ([remap describe-key] . helpful-key))
 
 (use-package hydra
-  :defer t)
+  :defer t) ; allows temporary keybindings
 
 (defhydra hydra-text-scale (:timeout 4)
   "scale text"
@@ -218,23 +246,25 @@
   "ts" '(hydra-text-scale/body :which-key "scale text"))
 
 (defun efs/org-font-setup ()
-  ;; Replace list hyphen with dot
+  ;; Visually replace list hyphen with dot, based on regular expression
   (font-lock-add-keywords 'org-mode
                           '(("^ *\\([-]\\) "
                              (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
 
-  ;; Set faces for heading levels
+  ;; Set faces for heading levels. Changes scale so variable size font.
   (dolist (face '((org-level-1 . 1.2)
                   (org-level-2 . 1.1)
                   (org-level-3 . 1.05)
                   (org-level-4 . 1.0)
-                  (org-level-5 . 1.1)
+                  (org-level-5 . 1.1) ; why does it get bigger again? 
                   (org-level-6 . 1.1)
                   (org-level-7 . 1.1)
                   (org-level-8 . 1.1)))
     (set-face-attribute (car face) nil :font "Cantarell" :weight 'regular :height (cdr face)))
 
-  ;; Ensure that anything that should be fixed-pitch in Org files appears that way
+  ;; Ensure that anything that should be fixed-pitch in Org files appears that way, because we set (variable-pitch-mode 1) for the whole buffer. 
+  ;; Here are a few overrides that won't look right unless it's a fixed-pitch-font
+  ;;
   (set-face-attribute 'org-block nil    :foreground nil :inherit 'fixed-pitch)
   (set-face-attribute 'org-table nil    :inherit 'fixed-pitch)
   (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
@@ -250,23 +280,24 @@
 (defun efs/org-mode-setup ()
   (org-indent-mode)
   (variable-pitch-mode 1)
-  (visual-line-mode 1))
+  (visual-line-mode 1)) ;this virtually wraps the content? Seems to wrap either way.
 
 (use-package org
   :pin org
   :commands (org-capture org-agenda)
   :hook (org-mode . efs/org-mode-setup)
   :config
-  (setq org-ellipsis " ▾")
+  (setq org-ellipsis " ▾" ; default is ..., but if work ends in punctuation this is weird, so turn into a triangle for collapse
+        org-hide-emphasis-markers t)
 
   (setq org-agenda-start-with-log-mode t)
   (setq org-log-done 'time)
-  (setq org-log-into-drawer t)
+  (setq org-log-into-drawer t) ;Fold entries into collapsable drawer
 
-  (setq org-agenda-files
-        '("~/Projects/Code/emacs-from-scratch/OrgFiles/Tasks.org"
-          "~/Projects/Code/emacs-from-scratch/OrgFiles/Habits.org"
-          "~/Projects/Code/emacs-from-scratch/OrgFiles/Birthdays.org"))
+  (setq org-agenda-files 
+      (seq-filter (lambda(x) (not (string-match "/archive/"(file-name-directory x)))) 
+       (directory-files-recursively "~/Documents/zettelkasten" "\\.org$")
+       ))
 
   (require 'org-habit)
   (add-to-list 'org-modules 'org-habit)
@@ -276,12 +307,12 @@
     '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
       (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)")))
 
-  (setq org-refile-targets
+  (setq org-refile-targets ; list of files whose taks are allowed to be archived?
     '(("Archive.org" :maxlevel . 1)
       ("Tasks.org" :maxlevel . 1)))
 
   ;; Save Org buffers after refiling!
-  (advice-add 'org-refile :after 'org-save-all-org-buffers)
+  (advice-add 'org-refile :after 'org-save-all-org-buffers) ; force save all buffers after refile because it refiles without saving
 
   (setq org-tag-alist
     '((:startgroup)
@@ -369,25 +400,29 @@
 
       ("m" "Metrics Capture")
       ("mw" "Weight" table-line (file+headline "~/Projects/Code/emacs-from-scratch/OrgFiles/Metrics.org" "Weight")
-       "| %U | %^{Weight} | %^{Notes} |" :kill-buffer t)))
+       "| %U | %^{Weight} | %^{Notes} |" :kill-buffer t))) ; kill-buffer removes the buffer from the list, but the information was saved
 
   (define-key global-map (kbd "C-c j")
     (lambda () (interactive) (org-capture nil "jj")))
 
+  ;(print-elements-of-list org-agenda-files)
   (efs/org-font-setup))
+
 
 (use-package org-bullets
   :hook (org-mode . org-bullets-mode)
   :custom
   (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
 
-(defun efs/org-mode-visual-fill ()
-  (setq visual-fill-column-width 100
-        visual-fill-column-center-text t)
-  (visual-fill-column-mode 1))
-
-(use-package visual-fill-column
-  :hook (org-mode . efs/org-mode-visual-fill))
+;; This causes a permanent indent on my machine. Can't get the cursor to left of screen, it's always about 40% in
+;; Originator has high dpi monitor and this made sense for him, but not for me.
+;(defun efs/org-mode-visual-fill ()
+;  (setq visual-fill-column-width 100
+;        visual-fill-column-center-text t)
+;  (visual-fill-column-mode 1))
+;
+;(use-package visual-fill-column
+;  :hook (org-mode . efs/org-mode-visual-fill))
 
 (with-eval-after-load 'org
   (org-babel-do-load-languages
@@ -414,6 +449,43 @@
       (org-babel-tangle))))
 
 (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config)))
+
+;;Custom function to insert current timestamp with time (org-time-stamp only inserts date..possibly there's a way to change that)
+(defun insert-now-timestamp()
+  "Insert org mode timestamp at point with current date and time."
+  (interactive)
+  (org-insert-time-stamp (current-time) t))
+
+(evil-define-key 'normal 'global (kbd "<leader>,t") '(insert-now-timestamp :wk "Insert timestamp"))
+(evil-define-key 'normal 'global (kbd "<leader>fs") '(save-buffer :wk "Save"))
+
+(use-package org-roam
+             :init
+             (setq org-roam-v2-ack t) ;suppress migration from V1 warning
+             :custom
+             (org-roam-directory "~/Documents/zettelkasten")
+             (org-roam-completion-everywhere t) ;Automatically bring up known nodes when typing in [[]]
+             (org-roam-capture-templates
+              '(("d" "default" plain
+                 "%?"
+                 :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+                 :unnarrowed t)
+                ("s" "store" plain (file "~/Documents/zettelkasten/templates/StoreTemplate.org")
+                 :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+filetags: Store")
+                 :unnarrowed t)
+                ("i" "incident" plain (file "~/Documents/zettelkasten/templates/IncTemplate.org")
+                 :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+filetags: Incident")
+                 :unnarrowed t)
+                ("S" "script" plain (file "~/Documents/zettelkasten/templates/ScriptTemplate.org")
+                 :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+filetags: Script")
+                 :unnarrowed t)
+                 ))
+             :bind (("C-c n l" . org-roam-buffer-toggle)
+                    ("C-c n f" . org-roam-node-find)
+                    ("C-c n i" . org-roam-node-insert)
+                    ("C-M-i" . completion-at-point))
+             :config
+             (org-roam-setup))
 
 (defun efs/lsp-mode-setup ()
   (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
@@ -610,3 +682,21 @@
 
 ;; Make gc pauses faster by decreasing the threshold.
 (setq gc-cons-threshold (* 2 1000 1000))
+
+; Other Notes
+;peach melpa -- themes site
+
+; M-x check-params -- jumps to first occurrence of mismatched parenthases -- useful if config breaks
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(org-agenda-files
+   '("~/Documents/zettelkasten/20240924063344-uhoh.org" "/home/jason/Documents/zettelkasten/daily/2024-09-24.org" "/home/jason/Documents/zettelkasten/20240924043658-programming_languages.org" "/home/jason/Documents/zettelkasten/20240924043848-emacs_lisp.org" "/home/jason/Documents/zettelkasten/20240924044022-scheme.org" "/home/jason/Documents/zettelkasten/20240924062946-new_org.org")))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
