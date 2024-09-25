@@ -111,6 +111,7 @@
   (efs/leader-keys
     "t"  '(:ignore t :which-key "toggles")
     "tt" '(counsel-load-theme :which-key "choose theme")
+    "fe" '(find-file :which-key "Find file")
     "fde" '(lambda () (interactive) (find-file (expand-file-name "~/.emacs.d/Emacs.org")))
     ",t" '(insert-now-timestamp :which-key "Insert Timestamp")))
 
@@ -456,9 +457,6 @@
   (interactive)
   (org-insert-time-stamp (current-time) t))
 
-(evil-define-key 'normal 'global (kbd "<leader>,t") '(insert-now-timestamp :wk "Insert timestamp"))
-(evil-define-key 'normal 'global (kbd "<leader>fs") '(save-buffer :wk "Save"))
-
 (use-package org-roam
              :init
              (setq org-roam-v2-ack t) ;suppress migration from V1 warning
@@ -654,7 +652,9 @@
   :ensure nil
   :commands (dired dired-jump)
   :bind (("C-x C-j" . dired-jump))
-  :custom ((dired-listing-switches "-agho --group-directories-first"))
+  :custom (
+           (dired-listing-switches "-agho --group-directories-first")
+           (dired-kill-when-opening-new-dired-buffer t))
   :config
   (evil-collection-define-key 'normal 'dired-mode-map
     "h" 'dired-single-up-directory
@@ -693,10 +693,31 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(org-agenda-files
-   '("~/Documents/zettelkasten/20240924063344-uhoh.org" "/home/jason/Documents/zettelkasten/daily/2024-09-24.org" "/home/jason/Documents/zettelkasten/20240924043658-programming_languages.org" "/home/jason/Documents/zettelkasten/20240924043848-emacs_lisp.org" "/home/jason/Documents/zettelkasten/20240924044022-scheme.org" "/home/jason/Documents/zettelkasten/20240924062946-new_org.org")))
+   '("~/Documents/zettelkasten/20240924063344-uhoh.org" "/home/jason/Documents/zettelkasten/daily/2024-09-24.org" "/home/jason/Documents/zettelkasten/20240924043658-programming_languages.org" "/home/jason/Documents/zettelkasten/20240924043848-emacs_lisp.org" "/home/jason/Documents/zettelkasten/20240924044022-scheme.org" "/home/jason/Documents/zettelkasten/20240924062946-new_org.org"))
+ '(package-selected-packages
+   '(buffer-line which-key vterm visual-fill-column typescript-mode rainbow-delimiters pyvenv python-mode org-roam org-bullets no-littering lsp-ui lsp-ivy ivy-rich ivy-prescient helpful general forge evil-nerd-commenter evil-collection eterm-256color eshell-git-prompt doom-themes doom-modeline dired-single dired-open dired-hide-dotfiles diminish dap-mode counsel-projectile company-box command-log-mode auto-package-update all-the-icons-dired)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
+(global-tab-line-mode t)
+;;These don't work. Must pass a window to funciton, so need to learn how to get windows by name
+(global-set-key (kbd "M-u") (lambda () (interactive) (tab-line-select-tab 1)))
+(global-set-key (kbd "M-i") (lambda () (interactive) (tab-line-select-tab 2)))
+(global-set-key (kbd "M-o") (lambda () (interactive) (tab-line-select-tab 3)))
+(global-set-key (kbd "M-p") (lambda () (interactive) (tab-line-select-tab 4)))
+
+(global-unset-key (kbd "M-h"))
+(global-set-key (kbd "M-h") (lambda () (interactive) (previous-buffer)))
+(global-set-key (kbd "M-l") (lambda () (interactive) (next-buffer)))
+
+(recentf-mode 1)
+(setq recentf-max-menu-items 25)
+(global-set-key "\C-x\ \C-r" 'recentf-open-files)
+
+(add-hook 'emacs-startup-hook (lambda ()
+  (when (get-buffer "*scratch*")
+    (kill-buffer "*scratch*"))))
