@@ -2,10 +2,79 @@
 
 This is an example of a fully custom Emacs configuration that you can use as inspiration when building your own!
 
-We're developing this configuration live on YouTube, subscribe to [[https://www.youtube.com/c/SystemCrafters?sub_confirmation=1][System Crafters]] (make sure to click the bell!) so that you're notified of future streams.
+This is a custom implementation based on a configuration live on YouTube, subscribe to [[https://www.youtube.com/c/SystemCrafters?sub_confirmation=1][System Crafters]] (make sure to click the bell!) so that you're notified of future streams.
 
-If you're enjoying the videos and benefitting from the examples in this repo, please *consider [[https://github.com/sponsors/daviwil][becoming a sponsor]]* to support the development of future content!
+* My custom notes
 
+ivy-mode 1 #This replaces builtin keybindings with counsel-equivilent
+ivy is a good place to define C-l done, C-j next C-k prev etc.
+helm is another completion framework contemporary with ivy.
+
+vertico is a more modern completion framework. Not sure if it can/should fully replace ivy?
+
+tango-dark, wombat decent built-in themes.
+
+This block of code will allow Ctrl+l to be the only option to choose completion
+https://emacs.stackexchange.com/questions/13286/how-can-i-stop-the-enter-key-from-triggering-a-completion-in-company-mode
+#+begin_src elisp
+(with-eval-after-load 'company
+  (define-key company-active-map (kbd "<return>") nil)
+  (define-key company-active-map (kbd "RET") nil)
+  (define-key company-active-map (kbd "C-l") #'company-complete-selection))
+#+end_src
+
+Evil goggles will give visual indication of what we just did in evil mode. Especially briefly highlight what we just yanked.
+
+#+begin_src elisp
+(use-package evil-goggles
+  :ensure t
+  :config
+  (evil-goggles-mode)
+
+   ;; optionally use diff-mode's faces; as a result, deleted text
+  ;; will be highlighed with `diff-removed` face which is typically
+  ;; some red color (as defined by the color theme)
+  ;; other faces such as `diff-added` will be used for other actions
+  (evil-goggles-use-diff-faces))
+#+end_src
+
+counsel-M-x has a default of starting with initial input of a carot ^.
+This (in regular expression syntax) means you'll be finding things that start with what you type.
+To disable this, do the following:
+#+begin_src elisp
+  (ivy-configure 'counsel-M-x
+    :initial-input "")
+ #+end_src 
+
+ The default had a ^ in the ""
+ 
+ Alt-o brings up more options when in counsel buffer
+
+ <mode>list-mode-map usually gives keybindings etcs for a mode.
+ 
+  When using use-package --
+  - :init runs always, but before package is loaded
+    :config runs after package is loaded
+
+ Doom themes I like:
+ doom-one
+ doom-palenight
+
+ M-: (requires shift key) - Brings up eval so you can type a command and execute it.
+
+ check-parens - will find unmatched parenthases
+
+ Package general is what allows keybinding to be defined like this:
+ (spacemacs/leader-keys
+     "t" '(:ignore t :which-key "toggles")
+     "tt" '(<command>)
+
+ If you get an error on install (use-package) that something doesn't exist that you know should, manually run list-packages which refreshes package list. Helpful with elpaca? Probably not.
+
+ C-z - fully disable evil mode and go back to emacs mode. Can help if evil mode is doing something weird.
+ 
+ C-M-\ = indent region. Good for autoformatting lips code.
+ 
 * How to Use This Configuration
 
 This repo is meant to be a companion to the Emacs From Scratch video series, serving as an example of a custom configuration build on top of vanilla Emacs.  I give instructions below for how to set it up to try it out, but it isn't meant to be used as your main configuration!  My goal here is to provide a working configuration that you can take inspiration from (and copy from directly).
@@ -33,11 +102,11 @@ Here is a list of all the episode videos with links to the configuration we buil
 11. [[https://youtu.be/dtjq68F2dXw][Keeping Your Emacs Packages Up to Date]] ([[https://github.com/daviwil/emacs-from-scratch/blob/4e921ccbe603d5fdd9c7f16c2418ac7322c8ab71/Emacs.org#automatic-package-updates][Code]], [[file:show-notes/Emacs-Scratch-11.org][Notes]])
 12. [[https://youtu.be/9i_9hse_Y08][How to Cut Emacs Start Up Time in Half!]] (Code, [[file:show-notes/Emacs-Scratch-12.org][Notes]])
 
-** [[https://www.youtube.com/playlist?list=PLEoMzSkcN8oPZvSdewHG8uApD7THlLLCV][Emacs Essentials]]
+*** [[https://www.youtube.com/playlist?list=PLEoMzSkcN8oPZvSdewHG8uApD7THlLLCV][Emacs Essentials]]
 
 1. [[https://youtu.be/48JlgiBpw_I][The Absolute Beginner's Guide to Emacs]] ([[file:show-notes/Emacs-Beginners-01.org][Notes]])
 
-** [[https://www.youtube.com/watch?v=RQK_DaaX34Q&list=PLEoMzSkcN8oPQtn7FQEF3D7sroZbXuPZ7][Learning Emacs Lisp]]
+*** [[https://www.youtube.com/watch?v=RQK_DaaX34Q&list=PLEoMzSkcN8oPQtn7FQEF3D7sroZbXuPZ7][Learning Emacs Lisp]]
 
 1. [[https://youtu.be/RQK_DaaX34Q][Introduction to Emacs Lisp]] ([[file:show-notes/Emacs-Lisp-01.org][Notes]])
 2. [[https://youtu.be/XXpgzyeYh_4][Types, Conditionals, and Loops]] ([[file:show-notes/Emacs-Lisp-02.org][Notes]])
@@ -45,7 +114,7 @@ Here is a list of all the episode videos with links to the configuration we buil
 4. [[https://youtu.be/tq4kTNL1VD8][Defining Variables and Scopes]] ([[file:show-notes/Emacs-Lisp-04.org][Notes]])
 5. [[https://youtu.be/J7d2LmivyyM][Reading and Writing Buffers in Practice]] ([[file:show-notes/Emacs-Lisp-05.org][Notes]], [[https://github.com/daviwil/dotcrafter.el/blob/8d507eda31e08a789c38a5d729866eb4cda6abaf/dotcrafter.el][Code]])
 
-** [[https://www.youtube.com/playlist?list=PLEoMzSkcN8oNPbEMYEtswOVTvq7CVddCS][Emacs Desktop Environment]]
+*** [[https://www.youtube.com/playlist?list=PLEoMzSkcN8oNPbEMYEtswOVTvq7CVddCS][Emacs Desktop Environment]]
 
 1. [[https://www.youtube.com/watch?v=f7xB2fFk1tQ][Getting Started with EXWM]] ([[https://github.com/daviwil/emacs-from-scratch/blob/219c060e1bd695948c7691955a12a5dcaf3a9530/Emacs.org#window-management][Code]], [[file:show-notes/Emacs-Desktop-01.org][Notes]])
 2. [[https://youtu.be/9gfKrrTtyOk][Improving the EXWM Experience]] ([[https://github.com/daviwil/emacs-from-scratch/blob/2805904966dbd5810ee735e25c4b427014761be5/Desktop.org][Code]], [[file:show-notes/Emacs-Desktop-02.org][Notes]])
@@ -54,12 +123,12 @@ Here is a list of all the episode videos with links to the configuration we buil
 5. [[https://youtu.be/usCfMstCZ7E][The Perfect Panel: Integrating Polybar with Emacs]] ([[https://github.com/daviwil/emacs-from-scratch/blob/75f1d4e08512c49ea073c26058df6d4cca3a0d6b/Desktop.org#panel-with-polybar][Code]], [[file:show-notes/Emacs-Desktop-05.org][Notes]])
 6. [[https://youtu.be/GX_LGfuojcE][Enabling Desktop Notifications with Dunst]] ([[https://github.com/daviwil/emacs-from-scratch/blob/b927109521b4b8a7e701709dabbdd9c1ea2fc27c/Desktop.org#desktop-notifications-with-dunst][Code]], [[file:show-notes/Emacs-Desktop-06.org][Notes]])
 
-** [[https://www.youtube.com/playlist?list=PLEoMzSkcN8oNvsrtk_iZSb94krGRofFjN][Emacs IDE]]
+*** [[https://www.youtube.com/playlist?list=PLEoMzSkcN8oNvsrtk_iZSb94krGRofFjN][Emacs IDE]]
 
 1. [[https://youtu.be/0bilcQVSlbM][How to Debug Your Code with dap-mode]] ([[https://github.com/daviwil/emacs-from-scratch/blob/210e517353abf4ed669bc40d4c7daf0fabc10a5c/Emacs.org#debugging-with-dap-mode][Code]], [[file:show-notes/Emacs-IDE-01.org][Notes]])
 2. [[https://youtu.be/jPXIP46BnNA][Python Development Configuration]] ([[https://github.com/daviwil/emacs-from-scratch/blob/dd9320769f3041ac1edca139496f14abe147d010/Emacs.org#python][Code]], [[file:show-notes/Emacs-IDE-02.org][Notes]])
 
-** [[https://www.youtube.com/watch?v=wKTKmE1wLyw&list=PLEoMzSkcN8oMHJ6Xil1YdnYtlWd5hHZql][Emacs Tips]]
+*** [[https://www.youtube.com/watch?v=wKTKmE1wLyw&list=PLEoMzSkcN8oMHJ6Xil1YdnYtlWd5hHZql][Emacs Tips]]
 
 1. [[https://youtu.be/gbdE7oZEdtA][How to Create and Manage Multiple Windows]] ([[file:show-notes/Emacs-Tips-05.org][Notes]])
 2. [[https://youtu.be/C7ZlNRbWdVI][Organize Your Windows with the Tab Bar in Emacs 27]] ([[file:show-notes/Emacs-Tips-06.org][Notes]])
@@ -70,14 +139,14 @@ Here is a list of all the episode videos with links to the configuration we buil
 7. [[https://youtu.be/nZ_T7Q49B8Y][Managing Encrypted Passwords with Emacs]] ([[file:show-notes/Emacs-Tips-Pass.org][Notes]])
 8. [[https://youtu.be/-H2nU0rsUMY][Hey Emacs, Don't Move My Windows!]] ([[file:show-notes/Emacs-Tips-DisplayBuffer-1.org][Notes]])
 
-** [[https://www.youtube.com/watch?v=yZRyEhi4y44&list=PLEoMzSkcN8oM-kA19xOQc8s0gr0PpFGJQ][Emacs Mail]]
+*** [[https://www.youtube.com/watch?v=yZRyEhi4y44&list=PLEoMzSkcN8oM-kA19xOQc8s0gr0PpFGJQ][Emacs Mail]]
 
 1. [[https://youtu.be/yZRyEhi4y44][Streamline Your E-mail Management with mu4e]] ([[file:show-notes/Emacs-Mail-01.org][Notes]])
 2. [[https://youtu.be/olXpfaSnf0o][Managing Multiple Email Accounts with mu4e and mbsync]] ([[file:show-notes/Emacs-Mail-02.org][Notes]])
 3. [[https://youtu.be/WiyqU7gmKsk][Compose and Send Email with Emacs]] ([[file:show-notes/Emacs-Mail-03.org][Notes]])
 4. [[https://youtu.be/aml36yZ-ANc][Enhance Your Emails with Org Mode]] ([[file:show-notes/Emacs-Mail-04.org][Notes]])
 5. [[https://youtu.be/dSZu4jwvaSs][Craft an Email Workflow with Org Mode]] ([[file:show-notes/Emacs-Mail-05.org][Notes]])
-
+   
 * Usage Instructions
 
 *IMPORTANT:* Be sure to read the commentary in [[file:Emacs.org][Emacs.org]] in case anything unexpected happens when you load this configuration.  Feel free to [[https://github.com/daviwil/runemacs/issues][file an issue]] to discuss any questions or problems you have so we can discuss it in a future stream!
